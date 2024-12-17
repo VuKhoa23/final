@@ -1,80 +1,78 @@
-"use client"
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation'; // Use `next/navigation` in the App Directory
+"use client";
 
-const Register: React.FC = () => {
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
+import { useForm, SubmitHandler } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import axiosInstance from "@/lib/axios";
+
+type RegisterFormInputs = {
+  username: string;
+  password: string;
+};
+
+export default function RegisterPage() {
   const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormInputs>();
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    // Check if passwords match
-    if (password !== confirmPassword) {
-      alert('Passwords do not match');
-      return;
+  const onSubmit: SubmitHandler<RegisterFormInputs> = async (data) => {
+    try {
+      await axiosInstance.post("/users/register", data);
+      alert("Registration successful. Please login.");
+      router.push("/login");
+    } catch (error) {
+      console.error("Registration failed:", error);
+      alert("Registration failed. Please try again.");
     }
-
-    // For demo, log the username and password
-    console.log('Username:', username);
-    console.log('Password:', password);
-
-    // After successful registration, redirect to the login page
-    router.push('/login');
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 className="text-2xl font-semibold text-center mb-6">Register</h2>
-        <div className="mb-4">
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          />
-        </div>
-        <div className="mb-6">
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
-        >
-          Register
-        </button>
-        <p className="mt-4 text-center text-sm">
-          Already have an account?{' '}
-          <a href="/login" className="text-blue-500 hover:underline">Login</a>
-        </p>
-      </form>
+    <div className="flex min-h-screen items-center w-screen justify-center bg-gray-100">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold text-center text-gray-800">Register</h1>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <input
+              {...register("username", { required: "Username is required" })}
+              className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            {errors.username && <p className="text-sm text-red-500">{errors.username.message}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <input
+              type="password"
+              {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 8,
+                  message: "Password must be at least 8 characters long",
+                },
+              })}
+              className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => router.push("/login")}
+            className="w-full py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 mt-4"
+          >
+            Already have an account? Login here
+          </button>
+          <button
+            type="submit"
+            className="w-full py-2 text-white bg-green-600 rounded-md hover:bg-green-700"
+          >
+            Register
+          </button>
+        </form>
+      </div>
     </div>
   );
-};
-
-export default Register;
+}

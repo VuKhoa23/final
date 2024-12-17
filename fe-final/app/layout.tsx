@@ -6,6 +6,7 @@ import StoreProvider from "./StoreProvider";
 
 import "./globals.css";
 import Loading from "./Loading";
+import Header from "@/components/Header";
 
 export const metadata: Metadata = {
     title: "WNC Final",
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <body className={poppins.className}>
                 <StoreProvider>
                     <Suspense fallback={<Loading />}>
+                        <Header/>
                         <article className="prose">{children}</article>
                     </Suspense>
                 </StoreProvider>

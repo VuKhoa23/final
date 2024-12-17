@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"github.com/VuKhoa23/advanced-web-be/internal/constants"
 	httpcommon "github.com/VuKhoa23/advanced-web-be/internal/domain/http_common"
 	"github.com/VuKhoa23/advanced-web-be/internal/repository"
 	"github.com/VuKhoa23/advanced-web-be/internal/utils/env"
@@ -98,6 +99,30 @@ func (a *AuthMiddleware) VerifyToken(c *gin.Context) {
 				))
 				return
 			}
+
+			//create new access token
+			accessToken, err = jwt.GenerateToken(constants.ACCESS_TOKEN_DURATION, jwtSecret, map[string]interface{}{
+				"id": userId,
+			})
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, httpcommon.NewErrorResponse(
+					httpcommon.Error{
+						Message: err.Error(),
+						Code:    httpcommon.ErrorResponseCode.InternalServerError,
+						Field:   "access token",
+					}))
+				return
+			}
+			c.SetCookie(
+				"access_token",
+				accessToken,
+				constants.COOKIE_DURATION,
+				"/",
+				"",
+				false,
+				true,
+			)
+
 			c.Set("userId", userId)
 			c.Next()
 			return

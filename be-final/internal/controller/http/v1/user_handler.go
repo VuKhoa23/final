@@ -57,11 +57,14 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 	c.JSON(200, httpcommon.NewSuccessResponse[entity.User](&entity.User{
 		Username: user.Username,
+		Id:       user.Id,
 	}))
 }
 
 func (h *UserHandler) WhoAmI(c *gin.Context) {
 	userId, _ := c.Get("userId")
 
-	c.JSON(200, gin.H{"userId": userId})
+	c.JSON(200, httpcommon.NewSuccessResponse[map[string]interface{}](&map[string]interface{}{
+		"userId": userId,
+	}))
 }
