@@ -8,6 +8,7 @@ import (
 	"github.com/VuKhoa23/advanced-web-be/internal/domain/entity"
 	httpcommon "github.com/VuKhoa23/advanced-web-be/internal/domain/http_common"
 	"github.com/jmoiron/sqlx"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRepository struct {
@@ -55,7 +56,8 @@ func (u UserRepository) LoginCommand(c context.Context, username string, passwor
 		return entity.User{}, err
 	}
 
-	if user.Password != password {
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
 		return entity.User{}, errors.New(httpcommon.ErrorMessage.BadCredential)
 	}
 

@@ -7,6 +7,7 @@ import (
 	"github.com/VuKhoa23/advanced-web-be/internal/service"
 	"github.com/VuKhoa23/advanced-web-be/internal/utils/validation"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
@@ -25,6 +26,8 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(auth.Password), bcrypt.DefaultCost)
+	auth.Password = string(hashedPassword)
 	err = h.userService.Register(c, auth)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, httpcommon.NewErrorResponse(
